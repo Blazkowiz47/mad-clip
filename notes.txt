@@ -1,0 +1,11 @@
+morph-types
+  lma
+  lmaubo 
+  mipgan2
+  mordiff
+  pipe
+
+printers:
+  DNP
+  rico 
+  digital
