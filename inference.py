@@ -42,12 +42,6 @@ parser.add_argument(
     default="",
 )
 
-with open("./bonafide_prompt.txt") as fp:
-    bonafide_prompt = fp.read()
-
-with open("./morph_prompt.txt") as fp:
-    morph_prompt = fp.read()
-
 
 def classify(
     imgs, lbls, processor, model
@@ -110,12 +104,10 @@ def main(
             bonafide_prompt = args.gdesc
         if args.mdesc:
             morph_prompt = args.mdesc
-        rdir = (
-            "/cluster/nbl-users/Shreyas-Sushrut-Raghu/FaceMoprhingDatabases/PRINT_SCAN/"  # noqa: E501
-        )
+        rdir = "/cluster/nbl-users/Shreyas-Sushrut-Raghu/FaceMoprhingDatabases/PRINT_SCAN/"  # noqa: E501
         printer = args.printer
         morph_type = args.morph
-        wrapper = Wrapper(rdir, morph_type, printer, 16)
+        wrapper = Wrapper(rdir, morph_type, printer, 64)
         testds = wrapper.get_test()
 
         model: CLIPModel = CLIPModel.from_pretrained("openai/clip-vit-large-patch14")

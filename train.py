@@ -31,11 +31,12 @@ parser.add_argument(
     default="lma",
 )
 
-with open("./bonafide_prompt.txt") as fp:
-    bonafide_prompt = fp.read()
-
-with open("./morph_prompt.txt") as fp:
-    morph_prompt = fp.read()
+parser.add_argument(
+    "-o",
+    "--model-name",
+    type=str,
+    default="",
+)
 
 
 def train_classifier(
@@ -93,11 +94,13 @@ def main(args: argparse.Namespace) -> None:
         morph_type = morph_type.split(",")
 
     wrapper = Wrapper(rdir, morph_type, printer, 32)
-    trainds = wrapper.get_train()
-    testds = wrapper.get_test()
+    trainds = wrapper.get_train(batch_size=32)
+    testds = wrapper.get_test(batch_size=64)
 
-    model: CLIPModel = CLIPModel.from_pretrained("openai/clip-vit-large-patch14")
-
+    model: CLIPModel = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+    processor: CLIPProcessor = CLIPProcessor.from_pretrained(
+        "openai/clip-vit-base-patch32"
+    )
     for params in model.parameters():
         params.requires_grad = False
 
@@ -135,9 +138,6 @@ def main(args: argparse.Namespace) -> None:
     # )
 
     model = model.cuda()
-    processor: CLIPProcessor = CLIPProcessor.from_pretrained(
-        "openai/clip-vit-large-patch14"
-    )
     optimizer = AdamW(
         [param for param in model.parameters() if param.requires_grad],
         1e-5,
@@ -145,7 +145,7 @@ def main(args: argparse.Namespace) -> None:
     loss_fn = CrossEntropyLoss().cuda()
     best_train_loss: float = float("inf")
     best_test_accuracy: float = 0.0
-    for epoch in range(10):
+    for epoch in range(20):
         model.train()
         bon_correct = 0
         bon_incorrect = 0
@@ -223,7 +223,7 @@ def main(args: argparse.Namespace) -> None:
             best_test_accuracy = accuracy
             torch.save(
                 model.state_dict(),
-                f"./checkpoints/best_cross_domain_{morph_type}_accuracy_model.pt",
+                f"./checkpoints/{args.model_name or ('best_cross_domain_' + morph_type + '_accuracy_model')}.pt",  # noqa: E501
             )
 
 

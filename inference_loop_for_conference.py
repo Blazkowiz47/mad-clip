@@ -2,8 +2,56 @@ import argparse
 import json
 from typing import Dict, Tuple
 from inference import main as inference
+from metrics import get_bpcer
 from morph_desc import morph_list, genuine_list
 import numpy as np
+
+
+def exp1(morphs, printers) -> None:
+    res = "\nExperiment 1 (vit base 32)\n"
+    for mprinter in printers:
+        res += "Trained on: " + mprinter
+        res += "\n\t"
+        for printer in printers:
+            res += printer + "\t"
+        res += "\n"
+
+        for morph in morphs:
+            res += morph + ": "
+            for printer in printers:
+                args = argparse.Namespace(
+                    morph=morph.strip(),
+                    printer=printer,
+                    model=f"./checkpoints/vit32_exp1_{morph}_{mprinter}",
+                )
+                eer, _, _, _, _, gen, mor = inference(args)
+                bpcer = get_bpcer(gen, mor, 10)
+                res += str(round(bpcer, 2)) + "\t"
+                np.save(
+                    f"./scores/vit32_exp1_{morph}_{mprinter}_{printer}_gen.npy", gen
+                )
+                np.save(
+                    f"./scores/vit32_exp1_{morph}_{mprinter}_{printer}_mor.npy", mor
+                )
+            res += "\n"
+
+
+def exp2(morphs, printers) -> None:
+    for printer in printers:
+        args = argparse.Namespace(
+            printer=printer,
+            morph=",".join(morphs),
+            model_name=f"vit32_exp2_{printer}",
+        )
+
+
+def exp3(morphs, printers) -> None:
+    for morph in morphs:
+        args = argparse.Namespace(
+            printer=",".join(printers),
+            morph=",".join([m for m in morphs if m != morph]),
+            model_name=f"vit32_exp3_{morph}",
+        )
 
 
 def main() -> None:
@@ -37,7 +85,9 @@ def main() -> None:
                         mor_incorrect,
                         gen,
                         mor,
-                    ) = inference(args)  # noqa: E501
+                    ) = inference(
+                        args
+                    )  # noqa: E501
                     np.save(
                         f"scores/fine_tune_on_{tmorph}_p{id}_{printer}_{morph.strip()}_gen.npy",
                         gen,

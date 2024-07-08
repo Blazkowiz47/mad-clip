@@ -30,14 +30,16 @@ class Wrapper:
 
             self.batch_size = batch_size
 
-    def loop_splitset(self, ssplit: str) -> DataLoader:
+    def loop_splitset(self, ssplit: str, batch_size: int = None, x=1) -> DataLoader:
+        batch_size = batch_size or self.batch_size
         mordirs = []
         bondirs = []
-        for mordir in self.mordir:
-            tmordir = os.path.join(mordir, ssplit)
-            if os.path.isdir(os.path.join(tmordir, "FaceDetect")):
-                tmordir = os.path.join(tmordir, "FaceDetect")
-            mordirs.append(tmordir)
+        if x:
+            for mordir in self.mordir:
+                tmordir = os.path.join(mordir, ssplit)
+                if os.path.isdir(os.path.join(tmordir, "FaceDetect")):
+                    tmordir = os.path.join(tmordir, "FaceDetect")
+                mordirs.append(tmordir)
 
         for bondir in self.bondir:
             bondir = os.path.join(bondir, ssplit)
@@ -59,16 +61,16 @@ class Wrapper:
 
         return DataLoader(
             DatasetGenerator(data),
-            batch_size=self.batch_size,
+            batch_size=batch_size,
             shuffle=True,
             num_workers=8,
         )
 
-    def get_test(self) -> DataLoader:
-        return self.loop_splitset("test")
+    def get_test(self, batch_size: int = None) -> DataLoader:
+        return self.loop_splitset("test", batch_size)
 
-    def get_train(self) -> DataLoader:
-        return self.loop_splitset("train")
+    def get_train(self, batch_size: int = None, x=1) -> DataLoader:
+        return self.loop_splitset("train", batch_size, x)
 
 
 class DatasetGenerator(Dataset):
