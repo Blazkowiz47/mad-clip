@@ -1,12 +1,15 @@
 import argparse
 from typing import List, Tuple
+import random
 
 from transformers import CLIPModel, CLIPProcessor
 import torch
 
+from train import set_seeds
 from dataset import Wrapper
 from tqdm import tqdm
 from metrics import get_eer
+from morph_desc import morph_list, genuine_list
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -48,8 +51,8 @@ def classify(
 ) -> Tuple[int, int, int, int, List[float], List[float]]:
     inputs = processor(
         text=[
-            morph_prompt,
-            bonafide_prompt,
+            random.choice(morph_list),
+            random.choice(genuine_list),
         ],
         images=imgs,
         return_tensors="pt",
@@ -99,20 +102,20 @@ def main(
     args: argparse.Namespace,
 ) -> Tuple[float, int, int, int, int, List[float], List[float]]:
     try:
-        global bonafide_prompt, morph_prompt
-        if args.gdesc:
-            bonafide_prompt = args.gdesc
-        if args.mdesc:
-            morph_prompt = args.mdesc
+        #         global bonafide_prompt, morph_prompt
+        #         if args.gdesc:
+        #             bonafide_prompt = args.gdesc
+        #         if args.mdesc:
+        #             morph_prompt = args.mdesc
         rdir = "/cluster/nbl-users/Shreyas-Sushrut-Raghu/FaceMoprhingDatabases/PRINT_SCAN/"  # noqa: E501
         printer = args.printer
         morph_type = args.morph
         wrapper = Wrapper(rdir, morph_type, printer, 64)
         testds = wrapper.get_test()
 
-        model: CLIPModel = CLIPModel.from_pretrained("openai/clip-vit-large-patch14")
+        model: CLIPModel = CLIPModel.from_pretrained(f"openai/clip-{args.backbone}")
         processor: CLIPProcessor = CLIPProcessor.from_pretrained(
-            "openai/clip-vit-large-patch14"
+            f"openai/clip-{args.backbone}"
         )
         if args.model:
             model.load_state_dict(torch.load(args.model))
@@ -126,7 +129,7 @@ def main(
         genscores: List[float] = []
         impscores: List[float] = []
         #     for imgs, lbls in tqdm(testds):
-        for imgs, lbls in tqdm(testds):
+        for imgs, lbls in testds:
             imgs, lbls = imgs, lbls.cuda()
             bcorrect, bincorrect, mcorrect, mincorrect, gs, ms = classify(
                 imgs, lbls, processor, model
@@ -139,14 +142,14 @@ def main(
             impscores.extend(ms)
 
         eer, *_ = get_eer(genscores, impscores)
-        print(f"{printer} {morph_type}")
-        print(
-            f"Bonafide ({bon_correct + bon_incorrect}): correct: {bon_correct} incorrect: {bon_incorrect}"  # noqa: E501
-        )
-        print(
-            f"Morph ({mor_correct + mor_incorrect}): correct: {mor_correct} incorrect: {mor_incorrect}"  # noqa: E501
-        )
-        print(f"{printer} {morph_type}")
+        #         print(f"{printer} {morph_type}")
+        #         print(
+        #             f"Bonafide ({bon_correct + bon_incorrect}): correct: {bon_correct} incorrect: {bon_incorrect}"  # noqa: E501
+        #         )
+        #         print(
+        #             f"Morph ({mor_correct + mor_incorrect}): correct: {mor_correct} incorrect: {mor_incorrect}"  # noqa: E501
+        #         )
+        #         print(f"{printer} {morph_type}")
 
         return (
             eer,
@@ -159,9 +162,10 @@ def main(
         )
     except Exception as e:
         print(e)
-        pass
+        raise e
 
 
 if __name__ == "__main__":
     args = parser.parse_args()
+    set_seeds()
     main(args)

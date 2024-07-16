@@ -41,7 +41,7 @@ def main() -> None:
         "mordiff",
         "pipe",
     ]
-    printers = ["digital", "DNP", "rico"]
+    printers = ["digital", "DNP"]
 
     exp1(morphs, printers)
     exp2(morphs, printers)

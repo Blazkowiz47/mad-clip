@@ -63,7 +63,7 @@ class Wrapper:
             DatasetGenerator(data),
             batch_size=batch_size,
             shuffle=True,
-            num_workers=8,
+            num_workers=20,
         )
 
     def get_test(self, batch_size: int = None) -> DataLoader:
