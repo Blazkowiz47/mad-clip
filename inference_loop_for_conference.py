@@ -122,7 +122,7 @@ def main() -> None:
         "mordiff",
         "pipe   ",
     ]
-    printers = ["digital", "DNP", "rico"]
+    printers = ["digital", "DNP"]
 
     model = "vit-large-patch14"
     exp1(morphs, printers, model)

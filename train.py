@@ -97,9 +97,9 @@ def main(args: argparse.Namespace) -> None:
     trainds = wrapper.get_train(batch_size=32)
     testds = wrapper.get_test(batch_size=64)
 
-    model: CLIPModel = CLIPModel.from_pretrained("openai/clip-vit-base-patch32")
+    model: CLIPModel = CLIPModel.from_pretrained("openai/clip-vit-large-patch14")
     processor: CLIPProcessor = CLIPProcessor.from_pretrained(
-        "openai/clip-vit-base-patch32"
+        "openai/clip-vit-large-patch14"
     )
     for params in model.parameters():
         params.requires_grad = False
