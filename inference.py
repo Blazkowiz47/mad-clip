@@ -107,7 +107,7 @@ def main(
         #             bonafide_prompt = args.gdesc
         #         if args.mdesc:
         #             morph_prompt = args.mdesc
-        rdir = "/cluster/nbl-users/Shreyas-Sushrut-Raghu/FaceMoprhingDatabases/PRINT_SCAN/"  # noqa: E501
+        rdir = "ROOT_DIR"  # noqa: E501
         printer = args.printer
         morph_type = args.morph
         wrapper = Wrapper(rdir, morph_type, printer, 64)

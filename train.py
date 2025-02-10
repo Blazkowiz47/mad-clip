@@ -84,7 +84,7 @@ def train_classifier(
 
 
 def main(args: argparse.Namespace) -> None:
-    rdir = "/cluster/nbl-users/Shreyas-Sushrut-Raghu/FaceMoprhingDatabases/PRINT_SCAN/"  # noqa: E501
+    rdir = "ROOT_DIR"  # noqa: E501
     printer = args.printer
     morph_type = args.morph
 

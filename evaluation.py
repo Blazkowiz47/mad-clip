@@ -118,7 +118,7 @@ def main(
 ) -> Tuple[float, List[float], List[float]]:
     try:
         rdir = (
-            "/cluster/nbl-users/Shreyas-Sushrut-Raghu/FaceMoprhingDatabases/PRINT_SCAN/"  # noqa: E501
+            "ROOT_DIR"  # noqa: E501
         )
         printer = args.printer
         morph_type = args.morph
